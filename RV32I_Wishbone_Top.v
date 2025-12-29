@@ -45,10 +45,6 @@ module RV32I_Wishbone_Top (
         // Nhan tin hieu phan hoi tu Adapter
         .mem_ready     (int_mem_ready),
         .mem_rdata     (int_mem_rdata)
-
-        // Luu y: Debug Port trong code core cua ban dang bi comment
-        // nen o day minh khong noi ra. Neu ban uncomment trong core
-        // thi nho noi them vao day nhe.
     );
 
    // ========================================================
@@ -58,7 +54,7 @@ module RV32I_Wishbone_Top (
         .clk_i      (clk),          
         .rst_i      (~rst_n),       
         
-        // --- Phia Core (Slave side cua Adapter) ---
+        // --- Phia Core ---
         // Port trong Module      // Day noi trong Top
         .core_req_i   (int_mem_req),
         .core_we_i    (int_mem_we),
@@ -68,11 +64,11 @@ module RV32I_Wishbone_Top (
         .core_ready_o (int_mem_ready),
         .core_rdata_o (int_mem_rdata),
 
-        // --- Phia Wishbone (Master side cua Adapter - Noi ra ngoai) ---
+        // --- Phia Wishbone ---
         .wb_data_i    (wbm_dat_i),    // Input Data tu Slave
         .wb_ack_i     (wbm_ack_i),    // Ack tu Slave
         
-        .wb_addr_o    (wbm_adr_o),    // Output Address (Luu y: module la addr, wire la adr)
+        .wb_addr_o    (wbm_adr_o),    // Output Address
         .wb_data_o    (wbm_dat_o),    // Output Data
         .wb_we_o      (wbm_we_o),
         .wb_stb_o     (wbm_stb_o),
