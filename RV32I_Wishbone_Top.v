@@ -56,7 +56,7 @@ module RV32I_Wishbone_Top (
     // ========================================================
     Wishbone_Core_Adapter adapter_inst (
         .clk_i      (clk),          
-        .rst_i      (~rst_n),       // Convert Active Low (rst_n) -> Active High (rst_i)
+        .rst_i      (~rst_n),       
         
         // --- Phia Core (Slave side cua Adapter) ---
         // Port trong Module      // Day noi trong Top
