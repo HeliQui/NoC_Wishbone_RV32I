@@ -68,7 +68,7 @@ module RV32I(
 
     // 2. PC
     PC pc_inst (
-        .clk(clk), .en(pc_enable), .rst(rst_n),
+        .clk(clk), .en(pc_enable), .rst_n(rst_n),
         .addr_in(pc_next), .addr_out(pc_current)
     );
 
@@ -88,7 +88,7 @@ module RV32I(
 
     // 5. Register File
     rf_32_32 rf_inst (
-        .clk(clk), .rst(rst_n), .reg_write(real_reg_write),
+        .clk(clk), .rst_n(rst_n), .reg_write(real_reg_write),
         .ra1(instr[19:15]), .ra2(instr[24:20]), .wa(instr[11:7]),
         .data_write(wb_data), // Data ghi nguoc ve (Write Back)
         .rd1(rd1_data), .rd2(rd2_data)
