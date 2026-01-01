@@ -1,6 +1,6 @@
 module timer (
     input  wire        clk,
-    input  wire        rst,
+    input  wire        rst_n,
     input  wire        we,          // Write Enable từ wrapper
     input  wire [ 1:0] addr,        // Địa chỉ rút gọn (0, 1, 2)
     input  wire [31:0] din,         // Dữ liệu ghi vào
@@ -25,7 +25,7 @@ module timer (
 
   // Logic Ghi & Đếm (Sequential)
   always @(posedge clk) begin
-    if (rst) begin
+    if (~rst_n) begin
       ctrl   <= 32'h0;
       period <= 32'hFFFF_FFFF;
       value  <= 32'h0;
