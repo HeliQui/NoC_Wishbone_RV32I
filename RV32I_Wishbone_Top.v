@@ -52,7 +52,7 @@ module RV32I_Wishbone_Top (
     // ========================================================
     Wishbone_Core_Adapter adapter_inst (
         .clk_i      (clk),          
-        .rst_i      (~rst_n),       
+        .rst_n_i      (rst_n),       
         
         // --- Phia Core ---
         // Port trong Module      // Day noi trong Top
