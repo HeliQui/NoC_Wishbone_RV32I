@@ -59,7 +59,7 @@ module wb_led_matrix_top (
       .clk(clk_i),
       .rst_n(rst_n_i),
       // --- Input tu Interface (Noi vao day noi bo) ---
-      .addr_i (led_addr),
+      .addr_i (led_addr[3:2]), // 2'b00: CTRL, 2'b01: DATA
       .write_data(led_wdata),
       .write_en   (led_we),
 
