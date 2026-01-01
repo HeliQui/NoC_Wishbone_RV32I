@@ -1,6 +1,6 @@
 module led_matrix (
     input wire clk,
-    input wire rst,
+    input wire rst_n,
     // Giao tiếp với Slave Wrapper
     input wire [1:0]  addr_i,    // Offset địa chỉ (ví dụ: 00, 01, 10)
     input wire [31:0] write_data,
@@ -15,7 +15,7 @@ module led_matrix (
 
     // Logic Ghi (Write)
     always @(posedge clk) begin
-        if (rst) begin
+        if (~rst_n) begin
             ctrl_reg <= 32'h0;
             data_reg <= 32'h0;
         end else if (write_en) begin
