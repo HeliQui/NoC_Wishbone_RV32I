@@ -14,34 +14,31 @@ module gpio_basic (
     reg [31:0] reg_out;
     reg [31:0] reg_in;
 
-    // --- 2. Tri-state Logic (KHÔNG DÙNG GENERATE) ---
-    // T?o m?t bi?n reg trung gian ?? tính toán logic
+    // --- 2. Tri-state Logic  ---
     reg [31:0] driver_val; 
-    integer k; // Bi?n ch?y vòng l?p
+    integer k; 
 
-    // Dùng always @(*) ?? mô t? m?ch t? h?p (Combinational logic)
     always @(*) begin
         for (k = 0; k < 32; k = k + 1) begin
-            // Logic vi?t y h?t nh? l?p trình C
+            // Logic vi?t y h?t nh? l?p trÃ¬nh C
             if (reg_dir[k] == 1'b1) begin
-                driver_val[k] = reg_out[k]; // N?u là Output -> l?y giá tr? reg_out
+                driver_val[k] = reg_out[k]; 
             end else begin
-                driver_val[k] = 1'bz;       // N?u là Input  -> ng?t (High-Z)
+                driver_val[k] = 1'bz;       
             end
         end
     end
 
-    // Cu?i cùng: N?i bi?n trung gian ra dây v?t lý
     assign gpio_pins = driver_val;
 
 
-    // --- 3. Input Synchronization (Gi? nguyên) ---
+    // --- 3. Input Synchronization ---
     always @(posedge clk or negedge rst) begin
         if (~rst) reg_in <= 32'd0;
         else     reg_in <= gpio_pins;
     end
 
-    // --- 4. Write Logic (Gi? nguyên) ---
+    // --- 4. Write Logic  ---
     always @(posedge clk or negedge rst) begin
         if (~rst) begin
             reg_dir <= 32'd0;
@@ -54,7 +51,7 @@ module gpio_basic (
         end
     end
 
-    // --- 5. Read Logic (Gi? nguyên) ---
+    // --- 5. Read Logic  ---
     always @(*) begin
         case (addr)
             2'b00: rdata = reg_dir;
