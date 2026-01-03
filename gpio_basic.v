@@ -20,7 +20,6 @@ module gpio_basic (
 
     always @(*) begin
         for (k = 0; k < 32; k = k + 1) begin
-            // Logic vi?t y h?t nh? l?p trình C
             if (reg_dir[k] == 1'b1) begin
                 driver_val[k] = reg_out[k]; 
             end else begin
