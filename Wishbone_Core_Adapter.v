@@ -6,7 +6,7 @@
 
 module Wishbone_Core_Adapter (
     input clk_i,
-    input rst_n_i,
+    input rst,
 
     // --- Giao dien phia Core ---
     input         core_req_i,    // CPU yeu cau truy cap bo nho
@@ -46,7 +46,7 @@ module Wishbone_Core_Adapter (
 
     // --- 1. Thanh ghi trang thai (Sequential) ---
     always @(posedge clk_i) begin
-        if (~rst_n_i) begin
+        if (rst) begin
             state       <= IDLE;
             is_write_op <= 1'b0;
         end else begin
@@ -115,7 +115,7 @@ module Wishbone_Core_Adapter (
     // --- 4. Duong du lieu (Sequential) ---
     // Chi cap nhat dia chi va du lieu khi bat dau giao dich moi
     always @(posedge clk_i) begin
-        if (~rst_n_i) begin
+        if (rst) begin
             wb_addr_o <= 32'd0;
             wb_data_o <= 32'd0;
             wb_sel_o  <= 4'b0000;

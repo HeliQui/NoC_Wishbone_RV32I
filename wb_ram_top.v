@@ -6,7 +6,7 @@ module wb_ram_top #(
     parameter MEM_SIZE = 1024
 ) (
     input wire clk_i,
-    input wire rst_n_i,
+    input wire rst,
     
     // --- Wishbone Interface (External Ports) ---
     // Tin hieu tu Master gui den (Ten chuan ngan gon: adr, dat)
@@ -34,7 +34,7 @@ module wb_ram_top #(
     // 1. Interface (Adapter): Quan ly FSM va Handshake Wishbone
     wishbone_slave_adapter wb_slave_adapter (
         .clk_i      (clk_i),
-        .rst_n_i      (rst_n_i),
+        .rst     (rst),
 
         // --- Wishbone Side (Mapping Port Adapter -> Port Top) ---
         .wb_addr_i  (wb_adr_i), 
@@ -61,7 +61,7 @@ module wb_ram_top #(
         .MEM_SIZE(MEM_SIZE)
     ) ram_inst (
         .clk        (clk_i),
-        
+        .rst        (rst),
         // --- Input tu Interface (Noi vao day noi bo) ---
         .addr       (ram_addr),
         .wdata      (ram_wdata), 

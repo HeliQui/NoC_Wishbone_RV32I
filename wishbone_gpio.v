@@ -1,6 +1,6 @@
 module wishbone_gpio (
     input wire clk_i,
-    input wire rst_n_i,
+    input wire rst,
 
     // --- Wishbone Interface ---
     input  wire [31:0] wb_addr_i,
@@ -31,7 +31,7 @@ module wishbone_gpio (
     // --- 2. Instantiate GPIO Core ---
     gpio_basic core (
         .clk      (clk_i),
-        .rst      (rst_n_i),    
+        .rst      (rst),    
         .addr     (core_addr),
         .we       (core_we),
         .wdata    (wb_data_i),
@@ -44,8 +44,8 @@ module wishbone_gpio (
     assign core_addr = wb_addr_i[3:2]; 
 
     // --- 4. FSM Logic  ---
-    always @(posedge clk_i or negedge rst_n_i) begin
-        if (!rst_n_i) state <= STATE_IDLE;
+    always @(posedge clk_i or posedge rst) begin
+        if (rst) state <= STATE_IDLE;
         else          state <= next_state;
     end
 

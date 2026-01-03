@@ -32,14 +32,14 @@ module gpio_basic (
 
 
     // --- 3. Input Synchronization ---
-    always @(posedge clk or negedge rst) begin
-        if (~rst) reg_in <= 32'd0;
+    always @(posedge clk or posedge rst) begin
+        if (rst) reg_in <= 32'd0;
         else     reg_in <= gpio_pins;
     end
 
     // --- 4. Write Logic  ---
-    always @(posedge clk or negedge rst) begin
-        if (~rst) begin
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
             reg_dir <= 32'd0;
             reg_out <= 32'd0;
         end else if (we) begin

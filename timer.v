@@ -1,11 +1,11 @@
 module timer (
     input  wire        clk,
-    input  wire        rst_n,
+    input  wire        rst,
     input  wire        we,          // Write Enable từ wrapper
-    input  wire [ 1:0] addr,        // Địa chỉ rút gọn (0, 1, 2)
+    input  wire [ 1:0] addr,        // �?ịa chỉ rút g�?n (0, 1, 2)
     input  wire [31:0] din,         // Dữ liệu ghi vào
-    output reg  [31:0] dout,        // Dữ liệu đọc ra
-    output      [31:0] current_val  // Để debug
+    output reg  [31:0] dout,        // Dữ liệu đ�?c ra
+    output      [31:0] current_val  // �?ể debug
 );
   reg [31:0] ctrl;
   reg [31:0] period;
@@ -13,7 +13,7 @@ module timer (
 
   assign current_val = value;
 
-  // Logic Đọc (Combinational)
+  // Logic �?�?c (Combinational)
   always @(*) begin
     case (addr)
       2'b00:   dout = ctrl;
@@ -23,9 +23,9 @@ module timer (
     endcase
   end
 
-  // Logic Ghi & Đếm (Sequential)
+  // Logic Ghi & �?ếm (Sequential)
   always @(posedge clk) begin
-    if (~rst_n) begin
+    if (rst) begin
       ctrl   <= 32'h0;
       period <= 32'hFFFF_FFFF;
       value  <= 32'h0;

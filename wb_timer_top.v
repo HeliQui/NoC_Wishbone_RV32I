@@ -5,7 +5,7 @@
 module wb_timer_top (
 
     input wire clk_i,
-    input wire rst_n_i,
+    input wire rst,
 
     // --- Wishbone Interface (External Ports) ---
     // Tin hieu tu Master gui den (Ten chuan ngan gon: adr, dat)
@@ -34,7 +34,7 @@ module wb_timer_top (
   // 1. Interface (Adapter): Quan ly FSM va Handshake Wishbone
   wishbone_slave_adapter_timer wb_slave_adapter (
       .clk_i  (clk_i),
-      .rst_n_i(rst_n_i),
+      .rst(rst),
 
       // --- Wishbone Side (Mapping Port Adapter -> Port Top) ---
       .wb_addr_i(wb_adr_i),
@@ -57,7 +57,7 @@ module wb_timer_top (
   // 2. TIMER
   timer timer_inst (
       .clk(clk_i),
-      .rst_n(rst_n_i),
+      .rst(rst),
       // --- Input tu Interface (Noi vao day noi bo) ---
       .addr (timer_addr[3:2]), // Lay bit 3:2 de phan biet 4 word
       .din(timer_wdata),

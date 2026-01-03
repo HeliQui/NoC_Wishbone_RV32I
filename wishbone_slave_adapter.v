@@ -1,6 +1,6 @@
 module wishbone_slave_adapter (
     input clk_i,
-    input rst_n_i,
+    input rst,
 
     // --- Giao dien Wishbone ---
     input  [31:0] wb_addr_i,   // Dia chi tu Master
@@ -30,7 +30,7 @@ module wishbone_slave_adapter (
 
     // --- 2. Thanh ghi trang thai ---
     always @(posedge clk_i) begin
-        if (~rst_n_i)
+        if (rst)
             state <= STATE_IDLE;
         else
             state <= next_state;

@@ -1,6 +1,6 @@
 module wishbone_slave_adapter_uart (
     input clk_i,
-    input rst_n_i,
+    input rst,
 
     // --- Giao diện Wishbone ---
     input  [31:0] wb_addr_i,
@@ -28,7 +28,7 @@ module wishbone_slave_adapter_uart (
   reg [1:0] state, next_state;
 
   always @(posedge clk_i) begin
-    if (~rst_n_i) state <= STATE_IDLE;
+    if (rst) state <= STATE_IDLE;
     else state <= next_state;
   end
 

@@ -1,6 +1,6 @@
 module wb_uart_top (
     input wire clk_i,
-    input wire rst_n_i,
+    input wire rst,
 
     // --- Wishbone Interface ---
     input wire [31:0] wb_adr_i,
@@ -27,7 +27,7 @@ module wb_uart_top (
   // 1. Interface (Adapter)
   wishbone_slave_adapter_uart adapter_inst (
       .clk_i         (clk_i),
-      .rst_n_i       (rst_n_i),
+      .rst      (rst),
       // Wishbone Side
       .wb_addr_i     (wb_adr_i),
       .wb_data_i     (wb_dat_i),
@@ -49,7 +49,7 @@ module wb_uart_top (
   // Luu y: Cap nhat uart_temp de nhan them tin hieu internal_sel
   uart uart_core_inst (
       .clk           (clk_i),
-      .rst_n         (rst_n_i),
+      .rst         (rst),
       .addr_i        (internal_addr),
       .write_data    (internal_wdata),
       .write_en      (internal_we),

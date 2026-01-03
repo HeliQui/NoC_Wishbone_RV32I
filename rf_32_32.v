@@ -1,5 +1,5 @@
 module rf_32_32 (
-	input clk, reg_write, rst_n,
+	input clk, reg_write, rst,
 	input [31:0] data_write,
 	input [4:0] wa, ra1, ra2,
 	output reg [31:0] rd1, rd2
@@ -7,8 +7,8 @@ module rf_32_32 (
 
 	reg [31:0] rf [31:0];
 	integer i;
-	always @(posedge clk or negedge rst_n) begin
-		if(~rst_n) begin
+	always @(posedge clk or posedge rst) begin
+		if(rst) begin
 			  rf[0]  <= 32'd0;
 			  rf[1]  <= 32'd0;
 			  rf[2]  <= 32'd0;

@@ -1,8 +1,10 @@
 `timescale 1ns / 1ps
 
-module RV32I_Wishbone_Top (
+module RV32I_Wishbone_Top #(
+    parameter IMEM_FILE = ""   
+)(
     input clk,
-    input rst_n,
+    input rst,
 
     // ========================================================
     // WISHBONE MASTER INTERFACE (Giao tiep ra ngoai)
@@ -31,9 +33,11 @@ module RV32I_Wishbone_Top (
     // ========================================================
     // 1. KHOI TAO CORE (RV32I)
     // ========================================================
-    RV32I core_inst (
+ RV32I #(
+    .IMEM_FILE(IMEM_FILE)   
+    ) core_inst (
         .clk           (clk),
-        .rst_n         (rst_n),
+        .rst        (rst),
 
         // Noi vao day noi bo (Internal Wires)
         .mem_req       (int_mem_req),
@@ -52,7 +56,7 @@ module RV32I_Wishbone_Top (
     // ========================================================
     Wishbone_Core_Adapter adapter_inst (
         .clk_i      (clk),          
-        .rst_n_i      (rst_n),       
+        .rst     (rst),       
         
         // --- Phia Core ---
         // Port trong Module      // Day noi trong Top

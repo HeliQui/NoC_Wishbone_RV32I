@@ -5,6 +5,7 @@ module ram #(
     parameter MEM_SIZE = 1024 
 ) (
     input wire clk,
+    input wire rst,        
 
     // Basic RAM Interface
     input wire [31:0] addr,    // Byte Address (from CPU)
@@ -22,10 +23,19 @@ module ram #(
 
     // Define Memory Array: Width 32-bit
     reg [31:0] mem [0:MEM_DEPTH-1];
+    
+    integer i;
 
     // --- RAM LOGIC ---
     always @(posedge clk) begin
-        if (en) begin
+        if (rst) begin
+            // --- RESET OPERATION ---
+            for (i = 0; i < MEM_DEPTH; i = i + 1) begin
+                mem[i] <= 32'b0;
+            end
+            rdata <= 32'b0;
+        end 
+        else if (en) begin
             // --- WRITE OPERATION ---
             // Use addr[31:2] to align to Word boundaries (Word Index)
             if (we) begin
@@ -40,10 +50,5 @@ module ram #(
             rdata <= mem[addr[31:2]];
         end
     end
-    
-    // Optional: Memory Initialization (for simulation)
-    // initial begin
-    //    $readmemh("program.hex", mem);
-    // end
 
 endmodule

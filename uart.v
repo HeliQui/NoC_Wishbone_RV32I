@@ -8,7 +8,7 @@
 
 module uart (
     input  wire        clk,
-    input  wire        rst_n,
+    input  wire        rst,
     // Giao tiếp với Wishbone Adapter (giống module LED/Timer của bạn)
     input  wire [ 1:0] addr_i,      // Lấy từ led_addr[3:2] như đã thảo luận
     input  wire [31:0] write_data,
@@ -52,11 +52,11 @@ module uart (
       .o_Rx_Byte(rx_byte)
   );
 
-  reg r_rx_data_ready;  // Biến giữ trạng thái để CPU đọc
+  reg r_rx_data_ready;  // Biến giữ trạng thái để CPU đ�?c
 
-  // 3. Logic điều khiển (Giao tiếp với RISC-V)
+  // 3. Logic đi�?u khiển (Giao tiếp với RISC-V)
   always @(posedge clk) begin
-    if (!rst_n) begin
+    if (rst) begin
       tx_dv <= 1'b0;
       r_rx_data_ready <= 1'b0;
     end else begin
@@ -68,19 +68,19 @@ module uart (
       if (rx_dv) begin
         r_rx_data_ready <= 1'b1;
       end 
-      // CHỈ XÓA KHI: Có lệnh truy cập THẬT (i_uart_sel) và là lệnh ĐỌC (!write_en)
+      // CHỈ XÓA KHI: Có lệnh truy cập THẬT (i_uart_sel) và là lệnh �?ỌC (!write_en)
       else if (i_uart_sel && !write_en && (addr_i == 2'b00)) begin
-        // Khi CPU thực hiện lệnh ĐỌC vào địa chỉ Data (2'b00)
-        // Ta hiểu là CPU đã lấy hàng xong -> Hạ cờ xuống
+        // Khi CPU thực hiện lệnh �?ỌC vào địa chỉ Data (2'b00)
+        // Ta hiểu là CPU đã lấy hàng xong -> Hạ c�? xuống
         r_rx_data_ready <= 1'b0;
       end
     end
   end
-  // 4. Logic Đọc (CPU kiểm tra trạng thái)
+  // 4. Logic �?�?c (CPU kiểm tra trạng thái)
   always @(*) begin
     case (addr_i)
       2'b00:   read_data = {24'h0, rx_byte};
-      // Trả về r_rx_data_ready (đã được giữ) thay vì rx_dv (xung ngắn)
+      // Trả v�? r_rx_data_ready (đã được giữ) thay vì rx_dv (xung ngắn)
       2'b01:   read_data = {30'h0, r_rx_data_ready, tx_active};
       default: read_data = 32'h0;
     endcase

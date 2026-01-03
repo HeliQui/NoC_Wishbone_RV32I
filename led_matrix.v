@@ -1,21 +1,21 @@
 module led_matrix (
     input wire clk,
-    input wire rst_n,
+    input wire rst,
     // Giao tiếp với Slave Wrapper
     input wire [1:0]  addr_i,    // Offset địa chỉ (ví dụ: 00, 01, 10)
     input wire [31:0] write_data,
     input wire        write_en,
     output reg [31:0] read_data,
-    // Ngõ ra thực tế điều khiển phần cứng
+    // Ngõ ra thực tế đi�?u khiển phần cứng
     output wire [31:0] led_pins
 );
 
-    reg [31:0] ctrl_reg; // Thanh ghi điều khiển (ví dụ: bit 0 là độ sáng hoặc enable)
+    reg [31:0] ctrl_reg; // Thanh ghi đi�?u khiển (ví dụ: bit 0 là độ sáng hoặc enable)
     reg [31:0] data_reg; // Thanh ghi chứa mẫu LED (bit tương ứng với đèn)
 
     // Logic Ghi (Write)
     always @(posedge clk) begin
-        if (~rst_n) begin
+        if (rst) begin
             ctrl_reg <= 32'h0;
             data_reg <= 32'h0;
         end else if (write_en) begin
@@ -26,7 +26,7 @@ module led_matrix (
         end
     end
 
-    // Logic Đọc (Read) - Để CPU kiểm tra xem đã ghi đúng chưa
+    // Logic �?�?c (Read) - �?ể CPU kiểm tra xem đã ghi đúng chưa
     always @(*) begin
         case (addr_i)
             2'b00: read_data = ctrl_reg;
