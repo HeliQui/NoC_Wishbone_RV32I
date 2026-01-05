@@ -1,4 +1,4 @@
-module ni_ram
+module ni_ip
 #(
     parameter MY_X = 1, 
     parameter MY_Y = 1,
@@ -6,7 +6,7 @@ module ni_ram
 )
 (
     input clk,
-    input rst_n,
+    input rst,
 
     // --- Giao tiếp RAM (Wishbone Master) ---
     output reg        wb_cyc_o, wb_stb_o, wb_we_o,
@@ -19,7 +19,7 @@ module ni_ram
     output reg [0:35] channel_out, 
     input      [0:35] channel_in, 
 
-    // --- Flow Control ---
+    // --- Flow Control (Encoded: [0]=Valid, [1]=VC_ID) ---
     input      [0:1]  flow_ctrl_in, 
     output reg [0:1]  flow_ctrl_out 
 );
@@ -31,18 +31,23 @@ module ni_ram
     reg flit_sent; 
     wire router_ready = (credit_count > 0);
 
-    // [FIX 1]: SỬA LỖI TÍN HIỆU X (MÀU ĐỎ)
-    // Dùng toán tử === để so sánh chính xác. Nếu flow_ctrl_in là X hoặc Z, kết quả sẽ là 0.
-    // Điều này ngăn chặn Credit Counter bị cộng với X và biến thành X.
-    wire cred_in = (flow_ctrl_in[1] === 1'b1); 
+    // --- [FIX] LOGIC ĐỌC CREDIT INPUT (Encoded) ---
+    wire cred_valid_in = flow_ctrl_in[0];
+    wire cred_vc_id_in = flow_ctrl_in[1];
+    
+    // NI_IP gửi gói tin Reply trên kênh VC1 
+    wire credit_inc = cred_valid_in && (cred_vc_id_in == 1'b1);
+    wire credit_dec = flit_sent; 
 
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) credit_count <= BUFFER_DEPTH;
-        else begin
-            if (cred_in && !flit_sent && credit_count < BUFFER_DEPTH)
-                credit_count <= credit_count + 1;
-            else if (!cred_in && flit_sent && credit_count > 0)
-                credit_count <= credit_count - 1;
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+             credit_count <= BUFFER_DEPTH;
+        end else begin
+            case ({credit_inc, credit_dec})
+                2'b10: if (credit_count < BUFFER_DEPTH) credit_count <= credit_count + 1;
+                2'b01: if (credit_count > 0)            credit_count <= credit_count - 1;
+                default: credit_count <= credit_count;
+            endcase
         end
     end
 
@@ -60,7 +65,7 @@ module ni_ram
     reg       we_saved; 
     reg [31:0] addr_saved;
     reg [31:0] read_data_latched; 
-	 
+    
     // Cập nhật theo chuẩn Stanford Mesh: 0:West, 1:East, 2:South, 3:North
     reg [2:0] return_lar;
     always @(*) begin
@@ -70,10 +75,10 @@ module ni_ram
         else if (src_x_saved < MY_X) 
             return_lar = 3'd0; // West (Đi sang trái - Port 0)  
         else if (src_y_saved > MY_Y) 
-            return_lar = 3'd3; // North (Đi lên - Port 3)     
+            return_lar = 3'd3; // North (Đi lên - Port 3)       
         else if (src_y_saved < MY_Y) 
-            return_lar = 3'd2; // South (Đi xuống - Port 2)   
-        else                         
+            return_lar = 3'd2; // South (Đi xuống - Port 2)     
+        else                      
             return_lar = 3'd4; // Local
     end
 
@@ -87,8 +92,8 @@ module ni_ram
     reg v_valid, v_head, v_tail;
     reg [31:0] v_data;
 
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin 
             state <= S_IDLE;
             wb_cyc_o <= 0; wb_stb_o <= 0; wb_we_o <= 0;
             wb_adr_o <= 0; wb_dat_o <= 0; wb_sel_o <= 0;
@@ -104,7 +109,9 @@ module ni_ram
             case (state)
                 S_IDLE: begin
                     if (rx_valid && rx_head) begin
-                        flow_ctrl_out[rx_vc] <= 1; 
+                        flow_ctrl_out[0] <= 1'b1;  // Valid
+                        flow_ctrl_out[1] <= rx_vc; // VC ID
+
                         // [24:21] Src X,Y (Lấy đúng vị trí)
                         src_x_saved <= rx_data[24:23];
                         src_y_saved <= rx_data[22:21];
@@ -127,7 +134,10 @@ module ni_ram
 
                 S_RX_TAIL: begin
                     if (rx_valid && rx_tail) begin
-                         flow_ctrl_out[rx_vc] <= 1; 
+                         flow_ctrl_out[0] <= 1'b1;
+                         flow_ctrl_out[1] <= rx_vc;
+                         // ---------------------------------
+
                          wb_dat_o <= rx_data; 
                          wb_cyc_o <= 1; wb_stb_o <= 1; wb_we_o <= 1;
                          wb_adr_o <= addr_saved;
@@ -158,9 +168,9 @@ module ni_ram
                             20'b0                     // Padding
                         };
                         flit_sent <= 1; 
-                        if (we_saved) begin // Write -> 1 flit
+                        if (we_saved) begin // Write -> 1 flit (Header Only)
                             v_tail <= 1; state <= S_IDLE; 
-                        end else begin      // Read -> 2 flit
+                        end else begin      // Read -> 2 flit (Header + Data)
                             v_tail <= 0; state <= S_RESP_DATA; 
                         end
                     end
@@ -180,7 +190,7 @@ module ni_ram
 
     always @(*) begin
         channel_out[0]    = v_valid;
-        channel_out[1]    = 1'b1; // VC 1 cho Reply
+        channel_out[1]    = 1'b1; // Gửi Reply trên VC 1
         channel_out[2]    = v_head;
         channel_out[3]    = v_tail;
         channel_out[4:35] = v_data;
